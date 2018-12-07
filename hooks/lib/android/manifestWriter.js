@@ -3,6 +3,7 @@ Class injects plugin preferences into AndroidManifest.xml file.
 */
 
 var path = require('path');
+var fs = require('fs');
 var xmlHelper = require('../xmlHelper.js');
 
 module.exports = {
@@ -18,7 +19,16 @@ module.exports = {
  * @param {Object} pluginPreferences - plugin preferences as JSON object; already parsed
  */
 function writePreferences(cordovaContext, pluginPreferences) {
-  var pathToManifest = path.join(cordovaContext.opts.projectRoot, 'platforms', 'android', 'AndroidManifest.xml');
+  var oldManifestLocation = path.join(cordovaContext.opts.projectRoot, 'platforms', 'android', 'AndroidManifest.xml');
+  var newManifestLocation = path.join(cordovaContext.opts.projectRoot, 'platforms', 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+  var pathToManifest;
+  if (fs.existsSync(newManifestLocation)) {
+    // cordova-android >= 7.0.0
+    pathToManifest = newManifestLocation;
+  } else {
+    // cordova-android < 7.0.0
+    pathToManifest = oldManifestLocation;
+  }
   var manifestSource = xmlHelper.readXmlAsJson(pathToManifest);
   var cleanManifest;
   var updatedManifest;
